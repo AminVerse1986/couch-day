@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>سوپرایز رمانتیک — روز مربی</title>
+    <style>
+      :root {
+        --bg1: #fff7fb;
+        --bg2: #ffeef6;
+        --card: #ffffff;
+        --accent: #ff7ab6;
+        --accent2: #ffd1e6;
+        --text: #3b2a3a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: linear-gradient(180deg, var(--bg1), var(--bg2));
+        font-family: "Tahoma", "Vazirmatn", system-ui, -apple-system, "Segoe UI",
+          Roboto, "Noto Naskh Arabic UI", sans-serif;
+        color: var(--text);
+        direction: rtl;
+      }
+
+      .frame {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+      }
+
+      .card {
+        width: min(960px, 96%);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(255, 255, 255, 0.95)
+        );
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 18px 40px rgba(48, 20, 40, 0.12);
+        position: relative;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+      }
+
+      /* top ribbon */
+      .ribbon {
+        position: absolute;
+        right: -40px;
+        top: -60px;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(
+            circle at 20% 20%,
+            rgba(255, 122, 182, 0.12),
+            transparent 30%
+          ),
+          linear-gradient(
+            135deg,
+            rgba(255, 223, 235, 0.8),
+            rgba(255, 250, 240, 0.2)
+          );
+        transform: rotate(25deg);
+        pointer-events: none;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 22px;
+        align-items: center;
+      }
+
+      /* photo placeholder */
+      .photo-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      .photo {
+        width: 300px;
+        height: 360px;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #fff, #fff);
+        box-shadow: 0 10px 30px rgba(15, 6, 20, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+      }
+      .photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .photo .placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: rgba(59, 42, 58, 0.35);
+        padding: 18px;
+        text-align: center;
+      }
+      .photo .placeholder b {
+        display: block;
+        margin-top: 8px;
+      }
+      .photo-controls {
+        display: flex;
+        gap: 10px;
+      }
+
+      /* main content */
+      .main {
+        padding: 8px 6px;
+      }
+      .title {
+        font-size: 28px;
+        margin: 0 0 6px;
+        color: var(--accent);
+      }
+      .subtitle {
+        margin: 0 0 16px;
+        color: #7a5a6b;
+        opacity: 0.95;
+      }
+      .message-card {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 250, 250, 0.9),
+          rgba(255, 246, 248, 0.8)
+        );
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      }
+      .message {
+        font-size: 18px;
+        line-height: 1.6;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 0;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .primary {
+        background: linear-gradient(90deg, var(--accent), #ffb3d9);
+        color: #fff;
+      }
+      .ghost {
+        background: transparent;
+        border: 1px solid rgba(59, 42, 58, 0.08);
+        color: var(--text);
+      }
+
+      /* hearts floating */
+      .heart {
+        position: absolute;
+        left: 40px;
+        bottom: 10px;
+        pointer-events: none;
+      }
+
+      /* animation effects */
+      .photo-scale {
+        transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1);
+      }
+      .photo:hover .photo-scale {
+        transform: translateY(-6px) scale(1.02);
+      }
+
+      /* 3D card flip on surprise */
+      .card.flipped {
+        transform: rotateY(8deg) translateZ(6px);
+      }
+
+      /* small screen */
+      @media (max-width: 880px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .photo {
+          width: 260px;
+          height: 320px;
+        }
+        .photo img {
+          object-position: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <div class="card" id="card">
+        <div class="ribbon" aria-hidden></div>
+        <div class="layout">
+          <div class="photo-wrap">
+            <!-- ظرف عکس: کاربر خودش عکس رو بذاره. از طریق آپلود محلی یا جایگزینی تگ <img> -->
+            <div
+              class="photo"
+              id="photoPlaceholder"
+              title="برای قرار دادن عکس، روی دکمه 'بارگذاری عکس' کلیک کن"
+            >
+              <div class="placeholder">
+                <svg
+                  width="64"
+                  height="64"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2C7.589 2 4 5.589 4 10c0 4.411 3.589 8 8 8s8-3.589 8-8c0-4.411-3.589-8-8-8z"
+                    stroke="#eaa"
+                    stroke-width="1.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M8 14l3-4 5 6"
+                    stroke="#eaa"
+                    stroke-width="1.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                <img src="./photo_2025-10-30_22-19-50.jpg" alt="couch" style="width: 100%;" />
+              </div>
+            </div>
+
+            <div class="photo-controls">
+              <input
+                id="photoInput"
+                type="file"
+                accept="image/*"
+                style="display: none"
+              />
+            </div>
+          </div>
+
+          <div class="main">
+            <h2 class="title"> روز مربی مبارک نیاشیم</h2>
+            <p class="subtitle">
+              یک سوپرایزِ اختصاصی و رمانتیک برای بهترین مربی دنیا
+            </p>
+
+            <div class="message-card">
+              <div
+                contenteditable="true"
+                aria-label="ویرایش پیام"
+                id="message"
+                class="message"
+              >
+                عزیزم، هر پرش تو، هر لبخند تو و هر سختی‌ای که پشت سر می‌ذاری به
+                 من نشون می‌ده چقدر قوی و لطیفی. ممنون که هستی.خیلی دوستت دارم شمر قشنگم.
+              </div>
+            </div>
+
+            <div class="controls">
+              <button class="primary" id="surpriseBtn">✨ اجرای سوپرایز</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- hearts canvas -->
+        <canvas
+          id="effects"
+          class="heart"
+          width="800"
+          height="400"
+          style="
+            pointer-events: none;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+          "
+        ></canvas>
+      </div>
+    </div>
+
+    <script>
+      /* ======= امکانات JS ======= */
+      const photoInput = document.getElementById("photoInput");
+      const photoPlaceholder = document.getElementById("photoPlaceholder");
+      const surpriseBtn = document.getElementById("surpriseBtn");
+      const toggleMusicBtn = document.getElementById("toggleMusic");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const card = document.getElementById("card");
+      const messageEl = document.getElementById("message");
+
+      // بارگذاری عکس محلی و نمایشِ زیبا
+      photoInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        setPhoto(url);
+      });
+
+      function setPhoto(src) {
+        photoPlaceholder.innerHTML = "";
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "عکس مربی";
+        img.className = "photo-scale";
+        photoPlaceholder.appendChild(img);
+        // subtle entrance
+        img.style.transform = "translateY(20px) scale(.98)";
+        img.style.opacity = 0;
+        requestAnimationFrame(() => {
+          img.style.transition =
+            "transform 700ms cubic-bezier(.2,.9,.2,1), opacity 600ms ease-out";
+          img.style.transform = "translateY(0) scale(1)";
+          img.style.opacity = 1;
+        });
+      }
+
+
+      /* ====== موزیک با WebAudio ====== */
+      let audioCtx = null;
+      let musicOn = false;
+      function playAmbient() {
+        if (!audioCtx)
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        // simple warm pad using two oscillators and slow LFO
+        const o1 = audioCtx.createOscillator();
+        const o2 = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        const lfo = audioCtx.createOscillator();
+        const lfoGain = audioCtx.createGain();
+        o1.type = "sine";
+        o2.type = "sine";
+        o1.frequency.value = 220;
+        o2.frequency.value = 440;
+        g.gain.value = 0.0001;
+        lfo.type = "sine";
+        lfo.frequency.value = 0.2;
+        lfoGain.gain.value = 0.08;
+        lfo.connect(lfoGain);
+        lfoGain.connect(o1.frequency);
+        o1.connect(g);
+        o2.connect(g);
+        g.connect(audioCtx.destination);
+        o1.start(now);
+        o2.start(now);
+        lfo.start(now);
+        // fade-in
+        g.gain.linearRampToValueAtTime(0.09, now + 0.6);
+        // stop later if turned off
+        return { o1, o2, lfo, g };
+      }
+      let musicNodes = null;
+
+      /* ====== افکت های رمانتیک: قلب ها و گلبرگ با canvas ====== */
+      const canvas = document.getElementById("effects");
+      const ctx = canvas.getContext("2d");
+      let W, H;
+      function resize() {
+        W = canvas.width = canvas.clientWidth;
+        H = canvas.height = canvas.clientHeight;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      function random(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+      const particles = [];
+      function spawnHeart(x, y) {
+        particles.push({
+          x: x || random(50, W - 50),
+          y: y || random(50, H - 50),
+          vx: random(-0.6, 0.6),
+          vy: random(-1.4, -0.4),
+          size: random(8, 22),
+          life: 0,
+          ttl: 140 + Math.random() * 60,
+          hue: random(320, 350),
+        });
+      }
+      function drawHeart(x, y, s, h) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(s / 22, s / 22);
+        ctx.beginPath();
+        ctx.moveTo(0, -6);
+        ctx.bezierCurveTo(6, -24, 34, -20, 34, 0);
+        ctx.bezierCurveTo(34, 20, 10, 34, 0, 44);
+        ctx.bezierCurveTo(-10, 34, -34, 20, -34, 0);
+        ctx.bezierCurveTo(-34, -20, -6, -24, 0, -6);
+        ctx.closePath();
+        ctx.fillStyle =
+          "hsl(" + h + ",70%," + (40 + Math.sin(s / 12) * 6) + "%)";
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function tick() {
+        ctx.clearRect(0, 0, W, H);
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.03;
+          p.life++;
+          const alpha = 1 - p.life / p.ttl;
+          ctx.globalAlpha = alpha;
+          drawHeart(p.x, p.y, p.size, p.hue);
+          ctx.globalAlpha = 1;
+          if (p.life > p.ttl) particles.splice(i, 1);
+        }
+        requestAnimationFrame(tick);
+      }
+      tick();
+
+      /* ====== کنفتیِ نرمِ گلبرگی هنگام اجرا ====== */
+      function launchSurprise() {
+        // small camera tilt
+        card.classList.add("flipped");
+        setTimeout(() => card.classList.remove("flipped"), 900);
+        // spawn many hearts
+        for (let i = 0; i < 50; i++) spawnHeart();
+        // little chime melody
+        melodyChime();
+        // pulsing message highlight
+        messageEl.animate(
+          [
+            { boxShadow: "0 0 0 rgba(255,122,182,0.0)" },
+            { boxShadow: "0 20px 40px rgba(255,122,182,0.12)" },
+          ],
+          { duration: 900, fill: "forwards", easing: "ease-out" }
+        );
+      }
+
+      function melodyChime() {
+        if (!audioCtx)
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        const notes = [880, 660, 550, 880];
+        notes.forEach((f, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.frequency.value = f;
+          o.type = "triangle";
+          g.gain.value = 0.0001;
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.start(now + i * 0.12);
+          g.gain.linearRampToValueAtTime(0.08, now + i * 0.12 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.14);
+          o.stop(now + i * 0.12 + 0.16);
+        });
+      }
+
+      surpriseBtn.addEventListener("click", () => {
+        launchSurprise();
+      });
+
+      // also spawn on double click photo
+      photoPlaceholder.addEventListener("dblclick", () => {
+        launchSurprise();
+      });
+
+      /* ====== دانلود کارت به صورت تصویر (screenshot) ====== */
+      downloadBtn.addEventListener("click", async () => {
+        // use html2canvas-like approach but simple: serialize card to SVG foreignObject and convert.
+        const rect = card.getBoundingClientRect();
+        const css = `body{margin:0} .card{width:${Math.round(rect.width)}px}`;
+        const node = card.cloneNode(true);
+        node.style.margin = "0";
+        node.style.transform = "none";
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${Math.round(
+          rect.width
+        )}' height='${Math.round(
+          rect.height
+        )}'><foreignObject width='100%' height='100%'><div xmlns='http://www.w3.org/1999/xhtml'>${new XMLSerializer().serializeToString(
+          node
+        )}</div></foreignObject></svg>`;
+        const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "surprise-card.svg";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      /* ====== shortcut: Enter fires surprise ====== */
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") launchSurprise();
+      });
+
+      // initial tiny floating hearts to make page alive
+      setInterval(() => {
+        spawnHeart(random(40, W - 40), random(40, H - 40));
+      }, 900);
+
+      /* ====== نکته برای تو: جای عکس را خودت پر کن ====== */
+      // اگر نمی‌خوای از آپلود استفاده کنی، می‌تونی مستقیماً تگ <img> را داخل #photoPlaceholder قرار بدی یا آدرس عکس را در setPhoto('URL') بگذاری.
+    </script>
+  </body>
+</html>
